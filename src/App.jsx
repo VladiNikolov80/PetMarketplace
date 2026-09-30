@@ -1,10 +1,12 @@
-function App() {
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+
+export default function App() {
   return (
     <div className="app">
-      <h1>PetMarketplace</h1>
-      <p>Pet products and services — post a listing or find one nearby.</p>
+      <Navbar />
+
+      <Footer />
     </div>
   );
 }
-
-export default App;
