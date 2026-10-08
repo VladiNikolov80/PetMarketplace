@@ -17,6 +17,8 @@ export default function Navbar() {
 
       {user ? (
         <>
+          <Link to="/create">Create Listing</Link>
+          <Link to="/profile">Profile</Link>
           <span>{user.email}</span>
           <button onClick={handleLogout}>Logout</button>
         </>
