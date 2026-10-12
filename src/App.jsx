@@ -5,9 +5,11 @@ import AuthGuard from './components/guards/AuthGuard';
 import GuestGuard from './components/guards/GuestGuard';
 import Home from './pages/Home';
 import Catalog from './pages/Catalog';
+import Details from './pages/Details';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Create from './pages/Create';
+import Edit from './pages/Edit';
 import Profile from './pages/Profile';
 
 export default function App() {
@@ -18,6 +20,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/catalog" element={<Catalog />} />
+        <Route path="/catalog/:id" element={<Details />} />
 
         <Route element={<GuestGuard />}>
           <Route path="/login" element={<Login />} />
@@ -26,6 +29,7 @@ export default function App() {
 
         <Route element={<AuthGuard />}>
           <Route path="/create" element={<Create />} />
+          <Route path="/edit/:id" element={<Edit />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>
