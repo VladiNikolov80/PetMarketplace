@@ -1,0 +1,41 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Listings: public read, only logged-in users can create,
+    // only the author can update or delete their own listing.
+    match /listings/{listingId} {
+      allow read: if true;
+      allow create: if request.auth != null
+                    && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if request.auth != null
+                    && request.auth.uid == resource.data.authorId;
+    }
+
+    // Users: each user can only read/write their own profile document.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    // Favorites: a user can only read, create and delete their own favorites.
+    match /favorites/{favoriteId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null
+                    && request.auth.uid == request.resource.data.userId;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow update: if false;
+    }
+
+    // Comments: readable by everyone (including guests), only logged-in
+    // users can post, and only as themselves. No edit/delete yet.
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if request.auth != null
+                    && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if false;
+    }
+  }
+}
