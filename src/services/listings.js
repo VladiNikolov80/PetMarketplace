@@ -9,6 +9,7 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  where,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -25,6 +26,13 @@ export async function getListings() {
   const q = query(listingsRef, orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export async function getListingsByAuthor(authorId) {
+  const q = query(listingsRef, where('authorId', '==', authorId));
+  const snapshot = await getDocs(q);
+  const listings = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return listings.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 }
 
 export async function getListingById(id) {
