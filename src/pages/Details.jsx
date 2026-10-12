@@ -40,6 +40,10 @@ export default function Details() {
   }, [id]);
 
   async function handleDelete() {
+    if (!isAuthor) {
+      return;
+    }
+
     const confirmed = window.confirm('Delete this listing? This cannot be undone.');
     if (!confirmed) {
       return;
