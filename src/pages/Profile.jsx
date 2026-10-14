@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getListingsByAuthor } from '../services/listings';
 import { getFavoriteListings } from '../services/favorites';
 import ListingCard from '../components/ListingCard';
+import './Profile.css';
 
 export default function Profile() {
   const { user } = useAuth();
@@ -52,31 +53,35 @@ export default function Profile() {
   }
 
   return (
-    <div>
+    <div className="profile-page">
       <h2>My Profile</h2>
-      <p>{user.email}</p>
+      <p className="profile-email">{user.email}</p>
 
-      <h3>My Listings</h3>
-      {myListings.length === 0 ? (
-        <p>You haven't published any listings yet.</p>
-      ) : (
-        <div className="listing-grid">
-          {myListings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
-          ))}
-        </div>
-      )}
+      <div className="profile-section">
+        <h3>My Ads</h3>
+        {myListings.length === 0 ? (
+          <p>You haven't published any ads yet.</p>
+        ) : (
+          <div className="listing-grid">
+            {myListings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        )}
+      </div>
 
-      <h3>Favorites</h3>
-      {favoriteListings.length === 0 ? (
-        <p>You haven't added any listings to your favorites yet.</p>
-      ) : (
-        <div className="listing-grid">
-          {favoriteListings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
-          ))}
-        </div>
-      )}
+      <div className="profile-section">
+        <h3>Favorites</h3>
+        {favoriteListings.length === 0 ? (
+          <p>You haven't added any ads to your favorites yet.</p>
+        ) : (
+          <div className="listing-grid">
+            {favoriteListings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

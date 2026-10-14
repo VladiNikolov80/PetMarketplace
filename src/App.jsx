@@ -11,28 +11,31 @@ import Register from './pages/Register';
 import Create from './pages/Create';
 import Edit from './pages/Edit';
 import Profile from './pages/Profile';
+import './App.css';
 
 export default function App() {
   return (
     <div className="app">
       <Navbar />
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/catalog" element={<Catalog />} />
-        <Route path="/catalog/:id" element={<Details />} />
+      <main className="page-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/catalog" element={<Catalog />} />
+          <Route path="/catalog/:id" element={<Details />} />
 
-        <Route element={<GuestGuard />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </Route>
+          <Route element={<GuestGuard />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
 
-        <Route element={<AuthGuard />}>
-          <Route path="/create" element={<Create />} />
-          <Route path="/edit/:id" element={<Edit />} />
-          <Route path="/profile" element={<Profile />} />
-        </Route>
-      </Routes>
+          <Route element={<AuthGuard />}>
+            <Route path="/create" element={<Create />} />
+            <Route path="/edit/:id" element={<Edit />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
+        </Routes>
+      </main>
 
       <Footer />
     </div>

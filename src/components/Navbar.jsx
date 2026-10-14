@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import './Navbar.css';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -11,23 +12,26 @@ export default function Navbar() {
   }
 
   return (
-    <nav>
-      <Link to="/">Home</Link>
-      <Link to="/catalog">Catalog</Link>
+    <nav className="navbar">
+      <Link to="/" className="navbar-brand">🐾 PetMarketplace</Link>
 
-      {user ? (
-        <>
-          <Link to="/create">Create Listing</Link>
-          <Link to="/profile">Profile</Link>
-          <span>{user.email}</span>
-          <button onClick={handleLogout}>Logout</button>
-        </>
-      ) : (
-        <>
-          <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
-        </>
-      )}
+      <div className="navbar-links">
+        <Link to="/catalog">Catalog</Link>
+
+        {user ? (
+          <>
+            <Link to="/create">Add Ad</Link>
+            <Link to="/profile">Profile</Link>
+            <span className="navbar-email">{user.email}</span>
+            <button onClick={handleLogout}>Logout</button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
+          </>
+        )}
+      </div>
     </nav>
   );
 }

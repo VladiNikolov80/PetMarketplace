@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createListing } from '../services/listings';
+import '../components/Form.css';
+
+const PET_TYPES = ['Dog', 'Cat', 'Bird', 'Rodent', 'Fish', 'Other'];
 
 export default function Create() {
   const { user } = useAuth();
@@ -12,6 +15,10 @@ export default function Create() {
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('product');
   const [imageUrl, setImageUrl] = useState('');
+  const [petType, setPetType] = useState(PET_TYPES[0]);
+  const [condition, setCondition] = useState('new');
+  const [brand, setBrand] = useState('');
+  const [availability, setAvailability] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -30,17 +37,27 @@ export default function Create() {
       return;
     }
 
+    const data = {
+      title: title.trim(),
+      description: description.trim(),
+      price: priceNumber,
+      category,
+      imageUrl: imageUrl.trim(),
+      petType,
+      authorId: user.uid,
+      authorName: user.email,
+    };
+
+    if (category === 'product') {
+      data.condition = condition;
+      data.brand = brand.trim();
+    } else {
+      data.availability = availability.trim();
+    }
+
     setSubmitting(true);
     try {
-      await createListing({
-        title: title.trim(),
-        description: description.trim(),
-        price: priceNumber,
-        category,
-        imageUrl: imageUrl.trim(),
-        authorId: user.uid,
-        authorName: user.email,
-      });
+      await createListing(data);
       navigate('/catalog');
     } catch {
       setError('Could not create the listing. Please try again.');
@@ -51,10 +68,10 @@ export default function Create() {
 
   return (
     <div>
-      <h2>Create Listing</h2>
+      <h2>Add Ad</h2>
 
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} className="form">
+        <div className="form-field">
           <label htmlFor="title">Title</label>
           <input
             id="title"
@@ -64,7 +81,7 @@ export default function Create() {
           />
         </div>
 
-        <div>
+        <div className="form-field">
           <label htmlFor="category">Category</label>
           <select
             id="category"
@@ -76,7 +93,57 @@ export default function Create() {
           </select>
         </div>
 
-        <div>
+        <div className="form-field">
+          <label htmlFor="petType">Pet type</label>
+          <select
+            id="petType"
+            value={petType}
+            onChange={(e) => setPetType(e.target.value)}
+          >
+            {PET_TYPES.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
+
+        {category === 'product' ? (
+          <>
+            <div className="form-field">
+              <label htmlFor="condition">Condition</label>
+              <select
+                id="condition"
+                value={condition}
+                onChange={(e) => setCondition(e.target.value)}
+              >
+                <option value="new">New</option>
+                <option value="used">Used</option>
+              </select>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="brand">Brand (optional)</label>
+              <input
+                id="brand"
+                type="text"
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="form-field">
+            <label htmlFor="availability">Availability (optional)</label>
+            <input
+              id="availability"
+              type="text"
+              value={availability}
+              onChange={(e) => setAvailability(e.target.value)}
+              placeholder="e.g. Mon-Fri, 9-18h"
+            />
+          </div>
+        )}
+
+        <div className="form-field">
           <label htmlFor="description">Description</label>
           <textarea
             id="description"
@@ -85,19 +152,19 @@ export default function Create() {
           />
         </div>
 
-        <div>
-          <label htmlFor="price">Price (BGN)</label>
+        <div className="form-field">
+          <label htmlFor="price">Price (€)</label>
           <input
             id="price"
             type="number"
             min="0"
-            step="0.01"
+            step="1"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
           />
         </div>
 
-        <div>
+        <div className="form-field">
           <label htmlFor="imageUrl">Image URL</label>
           <input
             id="imageUrl"
@@ -111,7 +178,7 @@ export default function Create() {
         {error && <p className="form-error">{error}</p>}
 
         <button type="submit" disabled={submitting}>
-          {submitting ? 'Publishing...' : 'Publish listing'}
+          {submitting ? 'Publishing...' : 'Publish ad'}
         </button>
       </form>
     </div>

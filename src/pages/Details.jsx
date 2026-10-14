@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getListingById, deleteListing } from '../services/listings';
 import { isFavorite, addFavorite, removeFavorite } from '../services/favorites';
 import { addComment, getComments } from '../services/comments';
+import './Details.css';
 
 export default function Details() {
   const { id } = useParams();
@@ -35,7 +36,7 @@ export default function Details() {
         }
       } catch {
         if (isMounted) {
-          setError('Could not load this listing.');
+          setError('Could not load this ad.');
         }
       } finally {
         if (isMounted) {
@@ -108,7 +109,7 @@ export default function Details() {
       return;
     }
 
-    const confirmed = window.confirm('Delete this listing? This cannot be undone.');
+    const confirmed = window.confirm('Delete this ad? This cannot be undone.');
     if (!confirmed) {
       return;
     }
@@ -117,7 +118,7 @@ export default function Details() {
       await deleteListing(id);
       navigate('/catalog');
     } catch {
-      setError('Could not delete this listing.');
+      setError('Could not delete this ad.');
     }
   }
 
@@ -127,7 +128,7 @@ export default function Details() {
     }
 
     if (!user) {
-      window.alert('Please log in or register to add this listing to your favorites.');
+      window.alert('Please log in or register to add this ad to your favorites.');
       return;
     }
 
@@ -184,41 +185,57 @@ export default function Details() {
   }
 
   if (!listing) {
-    return <p>This listing does not exist.</p>;
+    return <p>This ad does not exist.</p>;
   }
 
   const isAuthor = user && user.uid === listing.authorId;
 
   return (
-    <div>
-      {listing.imageUrl && <img src={listing.imageUrl} alt={listing.title} />}
-      <h2>{listing.title}</h2>
-      <p>{listing.category}</p>
-      <p>{listing.price} BGN</p>
-      <p>{listing.description}</p>
-      <p>Posted by {listing.authorName}</p>
-
-      {isAuthor && (
-        <div>
-          <Link to={`/edit/${listing.id}`}>Edit</Link>
-          <button onClick={handleDelete}>Delete</button>
-        </div>
+    <div className="details-page">
+      {listing.imageUrl ? (
+        <img src={listing.imageUrl} alt={listing.title} className="details-image" />
+      ) : (
+        <div className="details-image details-image-placeholder" aria-hidden="true">🐾</div>
       )}
 
-      {!isAuthor && (
-        <div>
-          <button
-            onClick={handleToggleFavorite}
-            disabled={favLoading}
-            className={user ? '' : 'btn-inactive'}
-          >
-            {isFav ? '👍 Favorited' : '👍 Add to favorites'}
-          </button>
-          {favError && <p className="form-error">{favError}</p>}
-        </div>
-      )}
+      <div className="details-info">
+        <h2>{listing.title}</h2>
+        <p className="details-category">{listing.category}</p>
+        <p className="details-meta">Pet type: {listing.petType}</p>
+        {listing.category === 'product' ? (
+          <>
+            {listing.condition && <p className="details-meta">Condition: {listing.condition}</p>}
+            {listing.brand && <p className="details-meta">Brand: {listing.brand}</p>}
+          </>
+        ) : (
+          listing.availability && <p className="details-meta">Availability: {listing.availability}</p>
+        )}
+        <p className="details-price">€{listing.price}</p>
+        <p>{listing.description}</p>
+        <p className="details-author">Posted by {listing.authorName}</p>
 
-      <div>
+        {isAuthor && (
+          <div className="details-actions">
+            <Link to={`/edit/${listing.id}`}>Edit</Link>
+            <button onClick={handleDelete} className="btn-danger">Delete</button>
+          </div>
+        )}
+
+        {!isAuthor && (
+          <div className="details-favorite">
+            <button
+              onClick={handleToggleFavorite}
+              disabled={favLoading}
+              className={user ? '' : 'btn-inactive'}
+            >
+              {isFav ? '👍 Favorited' : '👍 Add to favorites'}
+            </button>
+            {favError && <p className="form-error">{favError}</p>}
+          </div>
+        )}
+      </div>
+
+      <div className="comments-section">
         <h3>Comments</h3>
 
         {commentsLoading ? (
@@ -226,15 +243,17 @@ export default function Details() {
         ) : comments.length === 0 ? (
           <p>No comments yet.</p>
         ) : (
-          comments.map((comment) => (
-            <p key={comment.id}>
-              <strong>{comment.userName}</strong>: {comment.text}
-            </p>
-          ))
+          <div className="comments-list">
+            {comments.map((comment) => (
+              <p key={comment.id} className="comment-item">
+                <strong>{comment.userName}</strong>: {comment.text}
+              </p>
+            ))}
+          </div>
         )}
 
         {user ? (
-          <form onSubmit={handleCommentSubmit}>
+          <form onSubmit={handleCommentSubmit} className="comment-form">
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}

@@ -52,7 +52,7 @@ src/
 
 **Application Category / Topic:** Classifieds / marketplace site (E-commerce-adjacent), focused on pet products and services.
 
-**Main Purpose:** PetMarketplace lets pet owners publish listings — either a **product** (food, toys, accessories) or a **service** (walking, training, grooming) — and lets other users browse them, mark favorites, and leave comments. It solves the problem of pet owners having no simple, focused place to list and discover pet-related products and services from other individuals, instead of general classifieds sites cluttered with unrelated categories.
+**Main Purpose:** PetMarketplace lets pet owners publish listings — either a **product** (food, toys, accessories) or a **service** (walking, training, grooming) — and lets other users browse them, mark favorites, and leave comments. It solves the problem of pet owners having no simple, focused place to list and discover pet-related products and services from other individuals, instead of general classifieds sites cluttered with unrelated categories. Each ad also captures category-specific details — pet type always, plus condition/brand for products or availability for services.
 
 ### 2. User Access & Permissions
 
@@ -61,7 +61,7 @@ src/
 - Public data shown: all published listings (title, description, price, category, image, author's email) on Catalog and Details, and existing comments on a listing's Details page
 
 **Authenticated User**
-- Main sections/pages: everything a guest sees, plus Create Listing (`/create`) and Profile (`/profile`)
+- Main sections/pages: everything a guest sees, plus Add Ad (`/create`) and Profile (`/profile`)
 - Details pages: same Listing Details page (`/catalog/:id`) as a guest sees, but with extra actions available
 - Create / Edit / Delete actions: can create a new listing; can edit or delete **only** listings where they are the author (enforced both by hiding the Edit/Delete UI from non-authors and by a function-level check before the Firestore call); can add/remove a listing to their Favorites (except their own listings); can post comments on any listing
 
@@ -87,7 +87,7 @@ src/
 - `/`, `/catalog` and `/catalog/:id` are not wrapped by any guard and are reachable by everyone.
 
 **Main Routes**
-- 8 top-level pages: Home, Catalog, Listing Details, Login, Register, Create Listing, Edit Listing, Profile.
+- 8 top-level pages: Home, Catalog, Ad Details, Login, Register, Add Ad, Edit Ad, Profile.
 
 **Nested & Parameterized Routes**
 - Yes — `AuthGuard` and `GuestGuard` are parent layout routes whose matching child `<Route>` elements render through `<Outlet />`.
@@ -112,13 +112,13 @@ src/
 CRUD is implemented for the `listings` collection.
 
 **Create (POST)**
-- The user fills in a controlled form on the Create Listing page (title, description, price, category, image URL). After client-side validation, `createListing()` calls Firestore's `addDoc()`, storing the data together with `authorId`, `authorName` and a server timestamp.
+- The user fills in a controlled form on the Add Ad page (title, description, price in EUR, category, image URL, pet type, plus condition/brand for a product or availability for a service, depending on the selected category). After client-side validation, `createListing()` calls Firestore's `addDoc()`, storing the data together with `authorId`, `authorName` and a server timestamp.
 
 **Read (GET)**
 - `getListings()` fetches all listings for the Catalog page; `getListingById(id)` fetches a single listing for the Details and Edit pages. Both read from Firestore through the modular SDK (`getDocs`/`getDoc`).
 
 **Update (PUT/PATCH)**
-- The Edit page loads the existing listing and pre-fills the form. It only renders the form if the current user's id matches the listing's `authorId` — otherwise it shows "You are not allowed to edit this listing." instead.
+- The Edit Ad page loads the existing listing and pre-fills the form (including the category-specific fields). It only renders the form if the current user's id matches the listing's `authorId` — otherwise it shows "You are not allowed to edit this ad." instead.
 - On submit, `updateListing(id, data)` calls Firestore's `updateDoc()`. After a successful save, the user is navigated to the listing's Details page, which re-fetches the listing fresh from Firestore, so the UI reflects the change.
 
 **Delete**
@@ -127,12 +127,12 @@ CRUD is implemented for the `listings` collection.
 
 ### 8. Forms & Validation
 
-**Forms Used:** Register, Login, Create Listing, Edit Listing, Add Comment.
+**Forms Used:** Register, Login, Add Ad, Edit Ad, Add Comment.
 
 **Validation Rules (at least three fields)**
 - **Email** (Register/Login): required, `type="email"`; invalid credentials are also caught by Firebase itself and translated into a readable message.
 - **Password** (Register): required, `minLength={6}`, plus a client-side check that the repeated password matches before submitting ("Passwords do not match").
-- **Price** (Create/Edit listing — multiple rules on one field): required, must parse to a number, and must be greater than 0 ("Price must be a positive number").
+- **Price** (Add Ad/Edit Ad — multiple rules on one field, shown in EUR): required, must parse to a number, and must be greater than 0 ("Price must be a positive number").
 - **Title / Description** (Create/Edit listing): required, and trimmed before the check so whitespace-only input is also rejected.
 
 ### 9. React-Specific Techniques
@@ -146,7 +146,7 @@ CRUD is implemented for the `listings` collection.
 - `AuthContext`/`AuthProvider` wraps the whole app (in `main.jsx`) and exposes `{ user, loading, register, login, logout }` through `useAuth()`. It is consumed by the Navbar (to decide which links to show), both route guards, and the Create/Edit/Details/Profile pages (to know the current user's id/email) — a single source of truth for "who is logged in" instead of passing it down as props.
 
 **Component Styling**
-- Not implemented yet — plain unstyled JSX for now. An external CSS pass is planned as a deliberately later step in the project.
+- Implemented as a deliberately later step, once the functionality was working. A warm, friendly visual direction (cream background, terracotta accent, soft shadows/rounded corners) is defined as CSS custom properties in `src/index.css` and reused everywhere. Each component/page has its own `.css` file (e.g. `Navbar.css`, `ListingCard.css`, `Form.css` shared by the four forms) instead of one global stylesheet. The listing cards use a horizontal layout (image on one side, info on the other, the whole card is a single clickable link) inspired by a reference marketplace site, and the Home page has a gradient hero section.
 
 ### 10. Typical User Flow
 
@@ -159,5 +159,5 @@ CRUD is implemented for the `listings` collection.
 ### 11. Error & Edge Case Handling
 
 - **Authentication errors:** Firebase auth error codes (e.g. wrong password, email already in use) are translated into readable messages via `getAuthErrorMessage(err.code)` and shown inline on the Login/Register form instead of a raw error code or a crash.
-- **Network / data errors:** every Firestore read/write is wrapped in `try/catch`; a failure sets a local error state rendered as a message instead of leaving the page blank or frozen (e.g. "Could not load this listing.", "Could not save changes. Please try again.").
-- **Empty / missing data states:** Catalog shows "No listings yet. Be the first to publish one!" when there are none; Details shows "This listing does not exist." if the id doesn't match any document; Profile shows separate empty messages for "no listings yet" and "no favorites yet"; the Comments section shows "No comments yet." when there are none.
+- **Network / data errors:** every Firestore read/write is wrapped in `try/catch`; a failure sets a local error state rendered as a message instead of leaving the page blank or frozen (e.g. "Could not load this ad.", "Could not save changes. Please try again.").
+- **Empty / missing data states:** Catalog shows "No ads yet. Be the first to publish one!" when there are none; Details shows "This ad does not exist." if the id doesn't match any document; Profile shows separate empty messages for "no ads yet" and "no favorites yet"; the Comments section shows "No comments yet." when there are none.

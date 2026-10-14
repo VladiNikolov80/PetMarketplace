@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getAuthErrorMessage } from '../utils/authErrors';
+import '../components/Form.css';
 
 export default function Register() {
   const { register } = useAuth();
@@ -36,27 +37,48 @@ export default function Register() {
   return (
     <div>
       <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Email
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </label>
-        <label>
-          Password
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-        </label>
-        <label>
-          Repeat password
-          <input type="password" value={rePassword} onChange={(e) => setRePassword(e.target.value)} required />
-        </label>
+      <form onSubmit={handleSubmit} className="form">
+        <div className="form-field">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
 
-        {error && <p className="error">{error}</p>}
+        <div className="form-field">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+          />
+        </div>
+
+        <div className="form-field">
+          <label htmlFor="rePassword">Repeat password</label>
+          <input
+            id="rePassword"
+            type="password"
+            value={rePassword}
+            onChange={(e) => setRePassword(e.target.value)}
+            required
+          />
+        </div>
+
+        {error && <p className="form-error">{error}</p>}
 
         <button type="submit" disabled={submitting}>
           {submitting ? 'Creating account...' : 'Register'}
         </button>
       </form>
-      <p>Already have an account? <Link to="/login">Login</Link></p>
+      <p className="form-footer">Already have an account? <Link to="/login">Login</Link></p>
     </div>
   );
 }

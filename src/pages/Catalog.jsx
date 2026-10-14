@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getListings } from '../services/listings';
 import ListingCard from '../components/ListingCard';
+import './Catalog.css';
 
 export default function Catalog() {
   const [listings, setListings] = useState([]);
@@ -18,7 +19,7 @@ export default function Catalog() {
         }
       } catch {
         if (isMounted) {
-          setError('Could not load listings. Please try again later.');
+          setError('Could not load ads. Please try again later.');
         }
       } finally {
         if (isMounted) {
@@ -35,7 +36,7 @@ export default function Catalog() {
   }, []);
 
   if (loading) {
-    return <p>Loading listings...</p>;
+    return <p>Loading ads...</p>;
   }
 
   if (error) {
@@ -43,11 +44,11 @@ export default function Catalog() {
   }
 
   return (
-    <div>
+    <div className="catalog-page">
       <h2>Catalog</h2>
 
       {listings.length === 0 ? (
-        <p>No listings yet. Be the first to publish one!</p>
+        <p>No ads yet. Be the first to publish one!</p>
       ) : (
         <div className="listing-grid">
           {listings.map((listing) => (

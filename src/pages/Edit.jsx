@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getListingById, updateListing } from '../services/listings';
+import '../components/Form.css';
+
+const PET_TYPES = ['Dog', 'Cat', 'Bird', 'Rodent', 'Fish', 'Other'];
 
 export default function Edit() {
   const { id } = useParams();
@@ -13,6 +16,10 @@ export default function Edit() {
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('product');
   const [imageUrl, setImageUrl] = useState('');
+  const [petType, setPetType] = useState(PET_TYPES[0]);
+  const [condition, setCondition] = useState('new');
+  const [brand, setBrand] = useState('');
+  const [availability, setAvailability] = useState('');
 
   const [authorId, setAuthorId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +36,7 @@ export default function Edit() {
           return;
         }
         if (!data) {
-          setError('This listing does not exist.');
+          setError('This ad does not exist.');
           return;
         }
         setTitle(data.title);
@@ -37,10 +44,14 @@ export default function Edit() {
         setPrice(String(data.price));
         setCategory(data.category);
         setImageUrl(data.imageUrl || '');
+        setPetType(data.petType || PET_TYPES[0]);
+        setCondition(data.condition || 'new');
+        setBrand(data.brand || '');
+        setAvailability(data.availability || '');
         setAuthorId(data.authorId);
       } catch {
         if (isMounted) {
-          setError('Could not load this listing.');
+          setError('Could not load this ad.');
         }
       } finally {
         if (isMounted) {
@@ -71,15 +82,28 @@ export default function Edit() {
       return;
     }
 
+    const data = {
+      title: title.trim(),
+      description: description.trim(),
+      price: priceNumber,
+      category,
+      imageUrl: imageUrl.trim(),
+      petType,
+    };
+
+    if (category === 'product') {
+      data.condition = condition;
+      data.brand = brand.trim();
+      data.availability = '';
+    } else {
+      data.availability = availability.trim();
+      data.condition = '';
+      data.brand = '';
+    }
+
     setSubmitting(true);
     try {
-      await updateListing(id, {
-        title: title.trim(),
-        description: description.trim(),
-        price: priceNumber,
-        category,
-        imageUrl: imageUrl.trim(),
-      });
+      await updateListing(id, data);
       navigate(`/catalog/${id}`);
     } catch {
       setError('Could not save changes. Please try again.');
@@ -97,15 +121,15 @@ export default function Edit() {
   }
 
   if (authorId !== user.uid) {
-    return <p className="form-error">You are not allowed to edit this listing.</p>;
+    return <p className="form-error">You are not allowed to edit this ad.</p>;
   }
 
   return (
     <div>
-      <h2>Edit Listing</h2>
+      <h2>Edit Ad</h2>
 
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} className="form">
+        <div className="form-field">
           <label htmlFor="title">Title</label>
           <input
             id="title"
@@ -115,7 +139,7 @@ export default function Edit() {
           />
         </div>
 
-        <div>
+        <div className="form-field">
           <label htmlFor="category">Category</label>
           <select
             id="category"
@@ -127,7 +151,57 @@ export default function Edit() {
           </select>
         </div>
 
-        <div>
+        <div className="form-field">
+          <label htmlFor="petType">Pet type</label>
+          <select
+            id="petType"
+            value={petType}
+            onChange={(e) => setPetType(e.target.value)}
+          >
+            {PET_TYPES.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
+
+        {category === 'product' ? (
+          <>
+            <div className="form-field">
+              <label htmlFor="condition">Condition</label>
+              <select
+                id="condition"
+                value={condition}
+                onChange={(e) => setCondition(e.target.value)}
+              >
+                <option value="new">New</option>
+                <option value="used">Used</option>
+              </select>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="brand">Brand (optional)</label>
+              <input
+                id="brand"
+                type="text"
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="form-field">
+            <label htmlFor="availability">Availability (optional)</label>
+            <input
+              id="availability"
+              type="text"
+              value={availability}
+              onChange={(e) => setAvailability(e.target.value)}
+              placeholder="e.g. Mon-Fri, 9-18h"
+            />
+          </div>
+        )}
+
+        <div className="form-field">
           <label htmlFor="description">Description</label>
           <textarea
             id="description"
@@ -136,19 +210,19 @@ export default function Edit() {
           />
         </div>
 
-        <div>
-          <label htmlFor="price">Price (BGN)</label>
+        <div className="form-field">
+          <label htmlFor="price">Price (€)</label>
           <input
             id="price"
             type="number"
             min="0"
-            step="0.01"
+            step="1"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
           />
         </div>
 
-        <div>
+        <div className="form-field">
           <label htmlFor="imageUrl">Image URL</label>
           <input
             id="imageUrl"

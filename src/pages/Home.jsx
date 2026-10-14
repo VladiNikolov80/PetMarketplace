@@ -1,8 +1,14 @@
+import { Link } from 'react-router-dom';
+import './Home.css';
+
 export default function Home() {
   return (
-    <div>
-      <h2>Welcome to the Home Page</h2>
-      <p>This is the main landing page of the application.</p>
+    <div className="home-hero">
+      <div className="home-hero-content">
+        <h1>Find the right product or service for your pet</h1>
+        <p>Browse ads from other pet owners, or publish your own.</p>
+        <Link to="/catalog" className="home-cta">Browse the Catalog</Link>
+      </div>
     </div>
   );
 }
