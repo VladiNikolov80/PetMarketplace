@@ -4,7 +4,7 @@ A classifieds site for pet products and services, built as a React course exam p
 
 ## Live demo
 
-TODO: add the deployed frontend link here once the project is deployed (Vercel/Netlify).
+https://pet-marketplace-tawny.vercel.app/
 
 ## Tech stack
 
