@@ -10,6 +10,7 @@ export default function Create() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const [listingType, setListingType] = useState('offer');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -38,6 +39,7 @@ export default function Create() {
     }
 
     const data = {
+      listingType,
       title: title.trim(),
       description: description.trim(),
       price: priceNumber,
@@ -71,6 +73,18 @@ export default function Create() {
       <h2>Add Ad</h2>
 
       <form onSubmit={handleSubmit} className="form">
+        <div className="form-field">
+          <label htmlFor="listingType">Ad type</label>
+          <select
+            id="listingType"
+            value={listingType}
+            onChange={(e) => setListingType(e.target.value)}
+          >
+            <option value="offer">Offering</option>
+            <option value="wanted">Looking for</option>
+          </select>
+        </div>
+
         <div className="form-field">
           <label htmlFor="title">Title</label>
           <input
@@ -153,7 +167,7 @@ export default function Create() {
         </div>
 
         <div className="form-field">
-          <label htmlFor="price">Price (€)</label>
+          <label htmlFor="price">{listingType === 'wanted' ? 'Budget (€)' : 'Price (€)'}</label>
           <input
             id="price"
             type="number"

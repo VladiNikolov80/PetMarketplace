@@ -57,6 +57,22 @@
   font-size: 1rem;
 }
 
+.listing-type-badge {
+  align-self: flex-start;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.listing-type-badge-wanted {
+  background-color: var(--color-secondary);
+}
+
 .listing-card-price {
   color: var(--color-primary-dark);
   font-weight: 700;

@@ -1,3 +1,80 @@
 .catalog-page h2 {
   margin-bottom: 0.25rem;
 }
+
+.catalog-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.catalog-search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.catalog-type-filter {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.catalog-type-filter button {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  font-weight: 500;
+  padding: 0.5rem 0.9rem;
+}
+
+.catalog-type-filter button.active {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+.catalog-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.catalog-listings {
+  flex: 1;
+  min-width: 0;
+}
+
+.catalog-ad-slot {
+  display: none;
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 600px;
+  max-height: calc(100vh - 140px);
+  z-index: 10;
+  background-color: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  padding: 1rem;
+}
+
+.catalog-ad-slot--left {
+  left: 1rem;
+}
+
+.catalog-ad-slot--right {
+  right: 1rem;
+}
+
+/* Показваме банерите само когато има място отстрани на колоната от 960px */
+@media (min-width: 1360px) {
+  .catalog-ad-slot {
+    display: flex;
+  }
+}

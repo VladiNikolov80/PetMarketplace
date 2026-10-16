@@ -200,6 +200,9 @@ export default function Details() {
 
       <div className="details-info">
         <h2>{listing.title}</h2>
+        <span className={`listing-type-badge ${listing.listingType === 'wanted' ? 'listing-type-badge-wanted' : ''}`}>
+          {listing.listingType === 'wanted' ? 'Looking for' : 'Offering'}
+        </span>
         <p className="details-category">{listing.category}</p>
         <p className="details-meta">Pet type: {listing.petType}</p>
         {listing.category === 'product' ? (
@@ -210,7 +213,7 @@ export default function Details() {
         ) : (
           listing.availability && <p className="details-meta">Availability: {listing.availability}</p>
         )}
-        <p className="details-price">€{listing.price}</p>
+        <p className="details-price">{listing.listingType === 'wanted' ? 'Budget: ' : ''}€{listing.price}</p>
         <p>{listing.description}</p>
         <p className="details-author">Posted by {listing.authorName}</p>
 

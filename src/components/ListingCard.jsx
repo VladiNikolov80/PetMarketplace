@@ -2,11 +2,16 @@ import { Link } from 'react-router-dom';
 import './ListingCard.css';
 
 export default function ListingCard({ listing }) {
+  const isWanted = listing.listingType === 'wanted';
+
   return (
     <Link to={`/catalog/${listing.id}`} className="listing-card">
       <div className="listing-card-body">
+        <span className={`listing-type-badge ${isWanted ? 'listing-type-badge-wanted' : ''}`}>
+          {isWanted ? 'Looking for' : 'Offering'}
+        </span>
         <h3>{listing.title}</h3>
-        <p className="listing-card-price">€{listing.price}</p>
+        <p className="listing-card-price">{isWanted ? 'Budget: ' : ''}€{listing.price}</p>
         <p className="listing-card-category">{listing.category} · {listing.petType}</p>
       </div>
       {listing.imageUrl ? (
