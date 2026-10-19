@@ -6,6 +6,17 @@ A classifieds site for pet products and services, built as a React course exam p
 
 https://pet-marketplace-tawny.vercel.app/
 
+## Demo accounts
+
+Two test users are available for trying out the app without registering:
+
+| Email           | Password |
+|-----------------|----------|
+| test@test.com   | 123456   |
+| test1@test1.com | 123456   |
+
+Log in with one account to create, edit and delete your own ads; log in with the other to see that someone else's ads can only be viewed, favorited and commented on.
+
 ## Tech stack
 
 - React 19 + Vite
