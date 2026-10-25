@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import Create from './pages/Create';
 import Edit from './pages/Edit';
 import Profile from './pages/Profile';
+import Contact from './pages/Contact';
 import './App.css';
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/catalog" element={<Catalog />} />
           <Route path="/catalog/:id" element={<Details />} />
+          <Route path="/contact" element={<Contact />} />
 
           <Route element={<GuestGuard />}>
             <Route path="/login" element={<Login />} />

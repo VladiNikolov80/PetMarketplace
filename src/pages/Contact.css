@@ -1,0 +1,48 @@
+.contact-page {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.contact-intro {
+  color: var(--color-text-muted);
+  margin: 0.5rem 0 1.5rem;
+}
+
+.contact-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.contact-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.contact-card h3 {
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+
+.contact-card p {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.contact-button {
+  display: inline-block;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  padding: 0.7rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.contact-button:hover {
+  background-color: var(--color-primary-dark);
+  color: #ffffff;
+  text-decoration: none;
+}

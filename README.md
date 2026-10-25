@@ -68,7 +68,7 @@ src/
 ### 2. User Access & Permissions
 
 **Guest (Not Authenticated)**
-- Available pages/routes: `/`, `/catalog`, `/catalog/:id`, `/login`, `/register`
+- Available pages/routes: `/`, `/catalog`, `/catalog/:id`, `/contact`, `/login`, `/register`
 - Public data shown: all published listings (title, description, price, category, image, author's email) on Catalog and Details, and existing comments on a listing's Details page
 
 **Authenticated User**
@@ -95,10 +95,10 @@ src/
 - Two guard components are implemented as layout routes using `<Outlet />`:
   - `GuestGuard` — redirects a logged-in user to `/`; otherwise renders its child routes. Wraps `/login` and `/register`.
   - `AuthGuard` — redirects a guest to `/login`; otherwise renders its child routes. Wraps `/create`, `/edit/:id` and `/profile`.
-- `/`, `/catalog` and `/catalog/:id` are not wrapped by any guard and are reachable by everyone.
+- `/`, `/catalog`, `/catalog/:id` and `/contact` are not wrapped by any guard and are reachable by everyone.
 
 **Main Routes**
-- 8 top-level pages: Home, Catalog, Ad Details, Login, Register, Add Ad, Edit Ad, Profile.
+- 8 top-level dynamic pages: Home, Catalog, Ad Details, Login, Register, Add Ad, Edit Ad, Profile — plus a static Contact us page (`/contact`, linked from the footer) with a placeholder `mailto:` address (`contact@example.com`) for questions, advertising and future VIP ads.
 
 **Nested & Parameterized Routes**
 - Yes — `AuthGuard` and `GuestGuard` are parent layout routes whose matching child `<Route>` elements render through `<Outlet />`.
@@ -117,6 +117,7 @@ src/
 **Details Page**
 - Navigation is triggered via `<Link to={`/catalog/${listing.id}`}>` on each `ListingCard`.
 - The specific listing's id is received through the URL parameter (`useParams()`) and used to fetch that one listing with `getListingById(id)`.
+- Visitors who are not the author see an "✉️ Email the author" button that opens their email client (`mailto:`) with the author's address and a subject like "About your ad: <title>" already filled in.
 
 ### 6. Data Source & Backend
 

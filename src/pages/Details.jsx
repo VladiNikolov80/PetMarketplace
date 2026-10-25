@@ -233,6 +233,12 @@ export default function Details() {
             >
               {isFav ? '👍 Favorited' : '👍 Add to favorites'}
             </button>
+            <a
+              href={`mailto:${listing.authorName}?subject=${encodeURIComponent(`About your ad: ${listing.title}`)}`}
+              className="details-contact"
+            >
+              ✉️ Email the author
+            </a>
             {favError && <p className="form-error">{favError}</p>}
           </div>
         )}
