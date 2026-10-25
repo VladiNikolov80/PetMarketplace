@@ -14,6 +14,8 @@ export default function Details() {
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // If the image link is broken, we remember it and show the paw placeholder instead
+  const [failedImageUrl, setFailedImageUrl] = useState('');
 
   const [isFav, setIsFav] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
@@ -192,8 +194,13 @@ export default function Details() {
 
   return (
     <div className="details-page">
-      {listing.imageUrl ? (
-        <img src={listing.imageUrl} alt={listing.title} className="details-image" />
+      {listing.imageUrl && listing.imageUrl !== failedImageUrl ? (
+        <img
+          src={listing.imageUrl}
+          alt={listing.title}
+          className="details-image"
+          onError={() => setFailedImageUrl(listing.imageUrl)}
+        />
       ) : (
         <div className="details-image details-image-placeholder" aria-hidden="true">🐾</div>
       )}

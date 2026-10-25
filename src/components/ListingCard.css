@@ -20,10 +20,11 @@
 }
 
 .listing-card-image {
-  width: 120px;
-  height: auto;
-  align-self: stretch;
-  object-fit: cover;
+  width: 100px;
+  height: 100px;
+  align-self: center;
+  margin: 0 1rem;
+  object-fit: contain;
   flex-shrink: 0;
 }
 
