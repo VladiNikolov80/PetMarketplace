@@ -63,7 +63,7 @@ src/
 
 **Application Category / Topic:** Classifieds / marketplace site (E-commerce-adjacent), focused on pet products and services.
 
-**Main Purpose:** PetMarketplace lets pet owners publish listings — either a **product** (food, toys, accessories) or a **service** (walking, training, grooming) — and lets other users browse them, mark favorites, and leave comments. It solves the problem of pet owners having no simple, focused place to list and discover pet-related products and services from other individuals, instead of general classifieds sites cluttered with unrelated categories. Each ad also captures category-specific details — pet type always, plus condition/brand for products or availability for services.
+**Main Purpose:** PetMarketplace lets pet owners publish listings — either a **product** (food, toys, accessories) or a **service** (walking, training, grooming) — and lets other users browse them, mark favorites, and leave comments. It solves the problem of pet owners having no simple, focused place to list and discover pet-related products and services from other individuals, instead of general classifieds sites cluttered with unrelated categories. Each ad also captures category-specific details — pet type always, plus condition/brand for products or availability for services. Every ad is also either **Offering** (the author offers something) or **Looking for** (the author is searching for something), so the same site works for both supply and demand.
 
 ### 2. User Access & Permissions
 
@@ -108,7 +108,11 @@ src/
 
 **Catalog / List Page**
 - Displays all listings fetched from Firestore (`getListings()`, ordered by `createdAt` descending) as a grid of `ListingCard` components, with loading/error/empty states.
-- Filter/sort/search by category is not implemented yet — the `category` field exists on every listing, but there is currently no UI control to filter by it.
+- **Search by title:** a text field above the grid filters the loaded ads by title (case-insensitive, client-side).
+- **Ad type filter:** All / Offering / Looking for buttons filter by the `listingType` field. Each card shows a colored badge with its type, and "Looking for" ads show "Budget (€)" instead of "Price (€)".
+- **Pagination:** the filtered results are shown 18 per page with Prev / page number / Next buttons, displayed only when there is more than one page. Changing the search text or the type filter returns to page 1.
+- **Ad placeholders:** on wide screens (1360px and up) two empty 160×600 "Your ad here" slots are fixed to the left and right edges of the screen; the Home page has a similar banner. They are placeholders only — no real ad integration.
+- Filtering by category (Product/Service) is not implemented — the `category` field exists on every listing, but there is no separate UI control for it.
 
 **Details Page**
 - Navigation is triggered via `<Link to={`/catalog/${listing.id}`}>` on each `ListingCard`.
@@ -123,7 +127,7 @@ src/
 CRUD is implemented for the `listings` collection.
 
 **Create (POST)**
-- The user fills in a controlled form on the Add Ad page (title, description, price in EUR, category, image URL, pet type, plus condition/brand for a product or availability for a service, depending on the selected category). After client-side validation, `createListing()` calls Firestore's `addDoc()`, storing the data together with `authorId`, `authorName` and a server timestamp.
+- The user fills in a controlled form on the Add Ad page (ad type Offering/Looking for, title, description, price in EUR, category, image URL, pet type, plus condition/brand for a product or availability for a service, depending on the selected category). After client-side validation, `createListing()` calls Firestore's `addDoc()`, storing the data together with `authorId`, `authorName` and a server timestamp.
 
 **Read (GET)**
 - `getListings()` fetches all listings for the Catalog page; `getListingById(id)` fetches a single listing for the Details and Edit pages. Both read from Firestore through the modular SDK (`getDocs`/`getDoc`).
@@ -163,12 +167,12 @@ CRUD is implemented for the `listings` collection.
 
 1. A visitor opens the site and browses the Catalog without logging in, then opens a listing's Details page to read the full description and existing comments.
 2. They register a new account (or log in) and are redirected to Home.
-3. Logged in, they publish their own listing through the Create Listing form.
-4. They browse other users' listings, add one they like to their Favorites, and leave a comment on it.
+3. Logged in, they publish their own ad through the Add Ad form, choosing whether they are offering something or looking for something.
+4. They search and filter the Catalog, browse other users' ads, add one they like to their Favorites, and leave a comment on it.
 5. On their Profile page they see both their own published listing and the one they favorited; later they can edit or delete their own listing from its Details page.
 
 ### 11. Error & Edge Case Handling
 
 - **Authentication errors:** Firebase auth error codes (e.g. wrong password, email already in use) are translated into readable messages via `getAuthErrorMessage(err.code)` and shown inline on the Login/Register form instead of a raw error code or a crash.
 - **Network / data errors:** every Firestore read/write is wrapped in `try/catch`; a failure sets a local error state rendered as a message instead of leaving the page blank or frozen (e.g. "Could not load this ad.", "Could not save changes. Please try again.").
-- **Empty / missing data states:** Catalog shows "No ads yet. Be the first to publish one!" when there are none; Details shows "This ad does not exist." if the id doesn't match any document; Profile shows separate empty messages for "no ads yet" and "no favorites yet"; the Comments section shows "No comments yet." when there are none.
+- **Empty / missing data states:** Catalog shows "No ads yet. Be the first to publish one!" when there are none and "No ads match your search." when the search/filter returns nothing; Details shows "This ad does not exist." if the id doesn't match any document; Profile shows separate empty messages for "no ads yet" and "no favorites yet"; the Comments section shows "No comments yet." when there are none.
