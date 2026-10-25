@@ -1,6 +1,6 @@
 # PetMarketplace
 
-A classifieds site for pet products and services, built as a React course exam project.
+A small classifieds site for pet products and services. I made it as my exam project for the React course.
 
 ## Live demo
 
@@ -8,21 +8,21 @@ https://pet-marketplace-tawny.vercel.app/
 
 ## Demo accounts
 
-Two test users are available for trying out the app without registering:
+If you don't want to register, you can use one of these two test accounts:
 
 | Email           | Password |
 |-----------------|----------|
 | test@test.com   | 123456   |
 | test1@test1.com | 123456   |
 
-Log in with one account to create, edit and delete your own ads; log in with the other to see that someone else's ads can only be viewed, favorited and commented on.
+Log in with one of them to create, edit and delete your own ads. Then log in with the other one – you will see that you can only view, favorite and comment on ads that are not yours.
 
 ## Tech stack
 
 - React 19 + Vite
-- React Router (client-side routing + route guards)
-- Firebase Authentication (Email/Password)
-- Firebase Firestore (database)
+- React Router (for the pages and the route guards)
+- Firebase Authentication (email and password)
+- Firebase Firestore (the database)
 
 ## Running the project locally
 
@@ -31,7 +31,7 @@ Log in with one account to create, edit and delete your own ads; log in with the
    git clone https://github.com/VladiNikolov80/PetMarketplace.git
    cd PetMarketplace
    ```
-2. Install dependencies:
+2. Install the dependencies:
    ```
    npm install
    ```
@@ -39,20 +39,20 @@ Log in with one account to create, edit and delete your own ads; log in with the
    ```
    npm run dev
    ```
-4. Open the printed local address (usually `http://localhost:5173`) in your browser.
+4. Open the address that shows up in the terminal (usually `http://localhost:5173`).
 
-No `.env` file or extra setup is needed — the Firebase project configuration is already included in `src/firebase.js`. Firebase config values are not secret; the security boundary is enforced by Firestore Security Rules on the backend, not by hiding the configuration.
+You don't need a `.env` file or any extra setup. The Firebase config is already in `src/firebase.js`. At first I thought these values should be secret, but they are not – Firebase protects the data with Firestore Security Rules on the server, not by hiding the config.
 
 ## Project structure
 
 ```
 src/
-  components/      Reusable UI pieces (Navbar, Footer, ListingCard, route guards)
-  contexts/         AuthContext — global authentication state
-  pages/            Route-level pages (Home, Catalog, Details, Login, Register, Create, Edit, Profile)
-  services/         Firestore access functions (listings, favorites, comments)
-  utils/            Small helpers (Firebase error messages)
-  firebase.js       Firebase app initialization
+  components/      Reusable parts (Navbar, Footer, ListingCard, route guards)
+  contexts/        AuthContext – who is logged in
+  pages/           One file per page (Home, Catalog, Details, Login, Register, Create, Edit, Profile, Contact)
+  services/        Functions that talk to Firestore (listings, favorites, comments)
+  utils/           Small helpers (readable Firebase error messages)
+  firebase.js      Firebase setup
 ```
 
 ## Functional Guide
@@ -61,120 +61,123 @@ src/
 
 **Application Name:** PetMarketplace
 
-**Application Category / Topic:** Classifieds / marketplace site (E-commerce-adjacent), focused on pet products and services.
+**Application Category / Topic:** Classifieds / marketplace site for pet products and services.
 
-**Main Purpose:** PetMarketplace lets pet owners publish listings — either a **product** (food, toys, accessories) or a **service** (walking, training, grooming) — and lets other users browse them, mark favorites, and leave comments. It solves the problem of pet owners having no simple, focused place to list and discover pet-related products and services from other individuals, instead of general classifieds sites cluttered with unrelated categories. Each ad also captures category-specific details — pet type always, plus condition/brand for products or availability for services. Every ad is also either **Offering** (the author offers something) or **Looking for** (the author is searching for something), so the same site works for both supply and demand.
+**Main Purpose:** I wanted to make a small classifieds site only for pet stuff, a bit like OLX but without all the unrelated categories. Users can post an ad for a **product** (food, toys, accessories) or a **service** (walking, training, grooming). Other people can browse the ads, save the ones they like to Favorites and leave comments.
+
+Every ad also has a pet type. Products have condition and brand, services have availability. I also added two ad types: **Offering**, when you have something to give, and **Looking for**, when you are searching for something. This way the site works for both sides.
 
 ### 2. User Access & Permissions
 
 **Guest (Not Authenticated)**
-- Available pages/routes: `/`, `/catalog`, `/catalog/:id`, `/contact`, `/login`, `/register`
-- Public data shown: all published listings (title, description, price, category, image, author's display name) on Catalog and Details, and existing comments on a listing's Details page
+- Pages a guest can open: `/`, `/catalog`, `/catalog/:id`, `/contact`, `/login`, `/register`
+- A guest can see all ads (title, description, price, category, image and the author's name) in the Catalog and on the Details page, and can read the comments.
 
 **Authenticated User**
-- Main sections/pages: everything a guest sees, plus Add Ad (`/create`) and Profile (`/profile`)
-- Details pages: same Listing Details page (`/catalog/:id`) as a guest sees, but with extra actions available
-- Create / Edit / Delete actions: can create a new listing; can edit or delete **only** listings where they are the author (enforced both by hiding the Edit/Delete UI from non-authors and by a function-level check before the Firestore call); can add/remove a listing to their Favorites (except their own listings); can post comments on any listing
+- A logged-in user sees everything a guest sees, plus Add Ad (`/create`) and Profile (`/profile`).
+- On the Details page (`/catalog/:id`) they get some extra buttons.
+- They can create new ads. They can edit or delete **only their own** ads – the Edit/Delete buttons are hidden for other people's ads, and the functions also check the author again before calling Firestore. They can add other people's ads to Favorites (not their own) and comment on any ad.
 
 ### 3. Authentication & Session Handling
 
 **Authentication Flow**
-- On app load, `AuthProvider` subscribes to Firebase's `onAuthStateChanged` listener and does not render the rest of the app until the first response arrives (`loading` state), avoiding a flash of the wrong (logged-out/logged-in) UI
-- Authentication status is checked entirely through that listener — there is no manual token or flag read by the app's own code
-- On successful registration, a new Firebase Auth user is created and a matching `users/{uid}` document is written to Firestore (name + email + createdAt). The name entered on the Register form is also saved as the Firebase Auth `displayName` (`updateProfile()`), and it is shown instead of the email in the Navbar, on the user's ads ("Posted by …") and on their comments; the user is then redirected to `/`
-- On successful login, the user is redirected to `/`
-- On logout, Firebase signs the user out, `onAuthStateChanged` fires with `null`, and the Navbar/guards immediately reflect the logged-out state
+- When the app starts, `AuthProvider` listens to Firebase's `onAuthStateChanged`. Until the first answer comes, the app shows nothing (`loading` state). I did this so the page doesn't flash the wrong menu for a second.
+- The app checks if someone is logged in only through this listener. I don't store any token or flag myself.
+- When someone registers, Firebase creates the user and I also save a `users/{uid}` document in Firestore (name, email, createdAt). The name from the Register form is saved as the Firebase `displayName` with `updateProfile()`. This name is shown instead of the email in the Navbar, on the user's ads ("Posted by …") and on their comments. After that the user goes to `/`.
+- After login the user also goes to `/`.
+- On logout Firebase signs the user out, `onAuthStateChanged` gets `null`, and the Navbar and the guards change right away.
 
 **Session Persistence**
-- The session itself is persisted by the Firebase Authentication SDK (not by our own `localStorage`/cookie code); the app only ever sees it through `AuthContext`/`useAuth()`
-- After a page refresh, `onAuthStateChanged` fires again on mount with the previously signed-in user (if any), so the user stays logged in automatically without needing to log in again
+- Firebase Authentication keeps the session by itself – I didn't write any `localStorage` or cookie code. The rest of the app only uses it through `AuthContext` / `useAuth()`.
+- After a page refresh `onAuthStateChanged` runs again and returns the user who was logged in, so you stay logged in.
 
 ### 4. Routing Structure
 
 **Route Guards Logic**
-- Two guard components are implemented as layout routes using `<Outlet />`:
-  - `GuestGuard` — redirects a logged-in user to `/`; otherwise renders its child routes. Wraps `/login` and `/register`.
-  - `AuthGuard` — redirects a guest to `/login`; otherwise renders its child routes. Wraps `/create`, `/edit/:id` and `/profile`.
-- `/`, `/catalog`, `/catalog/:id` and `/contact` are not wrapped by any guard and are reachable by everyone.
+- I made two guard components. Both are layout routes with `<Outlet />`:
+  - `GuestGuard` – if you are logged in, it sends you to `/`. It wraps `/login` and `/register`.
+  - `AuthGuard` – if you are not logged in, it sends you to `/login`. It wraps `/create`, `/edit/:id` and `/profile`.
+- `/`, `/catalog`, `/catalog/:id` and `/contact` don't have a guard, so everyone can open them.
 
 **Main Routes**
-- 8 top-level dynamic pages: Home, Catalog, Ad Details, Login, Register, Add Ad, Edit Ad, Profile — plus a static Contact us page (`/contact`, linked from the footer) with a placeholder `mailto:` address (`contact@example.com`) for questions, advertising and future VIP ads.
+- 8 dynamic pages: Home, Catalog, Ad Details, Login, Register, Add Ad, Edit Ad, Profile.
+- There is also a static Contact us page (`/contact`), linked in the footer. It has a placeholder email (`contact@example.com`) for questions, advertising and VIP ads, which I would like to add in the future.
 
 **Nested & Parameterized Routes**
-- Yes — `AuthGuard` and `GuestGuard` are parent layout routes whose matching child `<Route>` elements render through `<Outlet />`.
-- URL parameters are used on two routes: `/catalog/:id` (Details) and `/edit/:id` (Edit), both read via `useParams()`.
+- Yes – `AuthGuard` and `GuestGuard` are parent routes, and their child `<Route>`s are shown through `<Outlet />`.
+- Two routes have a URL parameter: `/catalog/:id` (Details) and `/edit/:id` (Edit). Both read it with `useParams()`.
 
 ### 5. List → Details Flow
 
 **Catalog / List Page**
-- Displays all listings fetched from Firestore (`getListings()`, ordered by `createdAt` descending) as a grid of `ListingCard` components, with loading/error/empty states.
-- **Search by title:** a text field above the grid filters the loaded ads by title (case-insensitive, client-side).
-- **Ad type filter:** All / Offering / Looking for buttons filter by the `listingType` field. Each card shows a colored badge with its type, and "Looking for" ads show "Budget (€)" instead of "Price (€)".
-- **Pagination:** the filtered results are shown 18 per page with Prev / page number / Next buttons, displayed only when there is more than one page. Changing the search text or the type filter returns to page 1.
-- **Ad placeholders:** on wide screens (1360px and up) two empty 160×600 "Your ad here" slots are fixed to the left and right edges of the screen; the Home page has a similar banner. They are placeholders only — no real ad integration.
-- Filtering by category (Product/Service) is not implemented — the `category` field exists on every listing, but there is no separate UI control for it.
+- The Catalog loads all ads from Firestore with `getListings()` (newest first, by `createdAt`) and shows them as `ListingCard`s in a grid. It has loading, error and "no ads" states.
+- **Search by title:** there is a text field above the ads. It filters the loaded ads by title and doesn't care about upper/lower case.
+- **Ad type filter:** the buttons All / Offering / Looking for filter by the `listingType` field. Every card has a small colored badge with its type, and "Looking for" ads show "Budget (€)" instead of "Price (€)".
+- **Pagination:** the ads are shown 18 per page, with Prev / page numbers / Next buttons. The buttons appear only when there is more than one page. If you change the search or the filter, you go back to page 1.
+- **Ad placeholders:** on wide screens (1360px and more) there are two empty 160×600 "Your ad here" boxes fixed to the left and right edge of the screen. The Home page has a similar banner. For now they are just placeholders, there are no real ads.
+- There is no filter by category (Product/Service) yet. Every ad has a `category` field, but I didn't add a button for it.
 
 **Details Page**
-- Navigation is triggered via `<Link to={`/catalog/${listing.id}`}>` on each `ListingCard`.
-- The specific listing's id is received through the URL parameter (`useParams()`) and used to fetch that one listing with `getListingById(id)`.
-- Visitors who are not the author see an "✉️ Email the author" button that opens their email client (`mailto:`) with the author's address and a subject like "About your ad: <title>" already filled in.
+- You get to the Details page by clicking on a card – every `ListingCard` is a `<Link to={`/catalog/${listing.id}`}>`.
+- The page takes the ad's id from the URL with `useParams()` and loads only that ad with `getListingById(id)`.
+- If you are not the author, you see an "✉️ Email the author" button. It opens your email program (`mailto:`) with the author's address and a subject like "About your ad: <title>" already filled in.
 
 ### 6. Data Source & Backend
 
-**Backend Type:** Real backend — Firebase (Backend-as-a-Service). Firebase Authentication handles auth, Firestore handles all data storage. There is no custom server.
+**Backend Type:** Real backend – Firebase (Backend-as-a-Service). Firebase Authentication takes care of the users and Firestore stores all the data. I don't have my own server.
 
 ### 7. Data Operations (CRUD)
 
-CRUD is implemented for the `listings` collection.
+The full CRUD is for the `listings` collection (the ads).
 
 **Create (POST)**
-- The user fills in a controlled form on the Add Ad page (ad type Offering/Looking for, title, description, price in EUR, category, image URL, pet type, plus condition/brand for a product or availability for a service, depending on the selected category). After client-side validation, `createListing()` calls Firestore's `addDoc()`, storing the data together with `authorId`, `authorName` (the author's display name), `authorEmail` (used by the "Email the author" button) and a server timestamp.
+- On the Add Ad page the user fills in a controlled form: ad type (Offering / Looking for), title, description, price in EUR, category, image URL, pet type, and then condition and brand for a product or availability for a service. These last fields change depending on the category. After the form is validated, `createListing()` calls Firestore's `addDoc()`. Together with the form data I also save `authorId`, `authorName` (the author's name), `authorEmail` (for the "Email the author" button) and a server timestamp.
 
 **Read (GET)**
-- `getListings()` fetches all listings for the Catalog page; `getListingById(id)` fetches a single listing for the Details and Edit pages. Both read from Firestore through the modular SDK (`getDocs`/`getDoc`).
+- `getListings()` loads all ads for the Catalog, and `getListingById(id)` loads one ad for the Details and Edit pages. Both use the Firestore modular SDK (`getDocs` / `getDoc`).
 
 **Update (PUT/PATCH)**
-- The Edit Ad page loads the existing listing and pre-fills the form (including the category-specific fields). It only renders the form if the current user's id matches the listing's `authorId` — otherwise it shows "You are not allowed to edit this ad." instead.
-- On submit, `updateListing(id, data)` calls Firestore's `updateDoc()`. After a successful save, the user is navigated to the listing's Details page, which re-fetches the listing fresh from Firestore, so the UI reflects the change.
+- The Edit Ad page loads the ad and fills the form with its data, including the category fields. The form is shown only if the logged-in user is the author (`authorId`). Otherwise the page says "You are not allowed to edit this ad."
+- When you save, `updateListing(id, data)` calls Firestore's `updateDoc()`. After that you go to the ad's Details page, which loads the ad again from Firestore, so you see the new data.
 
 **Delete**
-- The Delete button on the Details page is rendered only when the current user is the listing's author. `handleDelete` re-checks authorship before showing a confirmation dialog and calling `deleteListing(id)` (Firestore `deleteDoc()`).
-- After a successful delete, the user is navigated to `/catalog`, whose own effect re-fetches the listings, so the deleted item disappears from the UI.
+- The Delete button on the Details page is shown only to the author. `handleDelete` checks again if you are the author, asks for confirmation and then calls `deleteListing(id)` (Firestore `deleteDoc()`).
+- After deleting, you go to `/catalog`, which loads the ads again, so the deleted one is gone.
 
 ### 8. Forms & Validation
 
 **Forms Used:** Register, Login, Add Ad, Edit Ad, Add Comment.
 
 **Validation Rules (at least three fields)**
-- **Email** (Register/Login): required, `type="email"`; invalid credentials are also caught by Firebase itself and translated into a readable message.
+- **Email** (Register/Login): required and `type="email"`. If the email or password is wrong, Firebase returns an error, and I show it as a readable message.
 - **Name** (Register): required, trimmed, at least 2 characters ("Name must be at least 2 characters.").
-- **Password** (Register): required, `minLength={6}`, plus a client-side check that the repeated password matches before submitting ("Passwords do not match").
-- **Price** (Add Ad/Edit Ad — multiple rules on one field, shown in EUR): required, must parse to a number, and must be greater than 0 ("Price must be a positive number").
-- **Title / Description** (Create/Edit listing): required, and trimmed before the check so whitespace-only input is also rejected.
+- **Password** (Register): required, `minLength={6}`, and I check that both passwords are the same before sending ("Passwords do not match").
+- **Price** (Add Ad/Edit Ad, in EUR): this field has more than one rule – it is required, it must be a number and it must be bigger than 0 ("Price must be a positive number").
+- **Title / Description** (Add Ad/Edit Ad): required. I trim them before checking, so a title with only spaces is not accepted.
 
 ### 9. React-Specific Techniques
 
 **Hooks & Component Lifecycle**
-- `useState` is used throughout for form and UI state (loading/submitting/error flags, field values).
-- `useEffect` is used for data fetching on mount and whenever its dependencies change — for example, the Details page runs three separate effects: loading the listing, checking favorite status, and loading comments.
-- Mount/update/unmount example: the Details page's listing-loading effect sets an `isMounted` flag and returns a cleanup function that flips it to `false` on unmount, preventing a `setState` call after the component is gone if the user navigates away before the Firestore read resolves. The same effect also re-runs (update) whenever the `:id` URL parameter changes, e.g. navigating directly from one listing's Details page to another's.
+- I use `useState` everywhere for form fields and UI state (loading, submitting, errors).
+- I use `useEffect` to load data when a page opens and when something it depends on changes. For example, the Details page has three separate effects: one loads the ad, one checks if it is in your Favorites, and one loads the comments.
+- Mount/update/unmount example: on the Details page, the `useEffect` that loads the ad has an `isMounted` flag. The cleanup function sets it to `false` when the component unmounts. I did this because if the user leaves the page before Firestore answers, React should not try to update a component that is already gone. The same effect also runs again (update) when the `:id` in the URL changes, for example when you go from one ad to another.
 
 **Context API**
-- `AuthContext`/`AuthProvider` wraps the whole app (in `main.jsx`) and exposes `{ user, displayName, loading, register, login, logout }` through `useAuth()`. `displayName` is kept in its own state so that the Navbar and other pages re-render immediately when the name is set at registration. It is consumed by the Navbar (to decide which links to show), both route guards, and the Create/Edit/Details/Profile pages (to know the current user's id/email) — a single source of truth for "who is logged in" instead of passing it down as props.
+- `AuthContext` / `AuthProvider` wraps the whole app (in `main.jsx`) and gives `{ user, displayName, loading, register, login, logout }` through `useAuth()`. I keep `displayName` in its own state, so the Navbar and the other pages show the new name right after registration. The context is used by the Navbar (to know which links to show), by both route guards and by the Create, Edit, Details and Profile pages (to know the user's id, name and email). This way there is one place that knows who is logged in, and I don't have to pass it down as props.
 
 **Component Styling**
-- Implemented as a deliberately later step, once the functionality was working. A warm, friendly visual direction (cream background, terracotta accent, soft shadows/rounded corners) is defined as CSS custom properties in `src/index.css` and reused everywhere. Each component/page has its own `.css` file (e.g. `Navbar.css`, `ListingCard.css`, `Form.css` shared by the four forms) instead of one global stylesheet. The listing cards use a horizontal layout (image on one side, info on the other, the whole card is a single clickable link) inspired by a reference marketplace site, and the Home page has a gradient hero section.
+- I did the styling at the end, after everything was working. I chose warm and friendly colors (cream background, terracotta accent, soft shadows and rounded corners). The colors are CSS variables in `src/index.css` and are used everywhere. Every component and page has its own `.css` file (for example `Navbar.css`, `ListingCard.css`, and `Form.css`, which is shared by the forms) instead of one big file. The ad cards are horizontal – picture on one side, text on the other, and the whole card is one link. I got the idea from a real classifieds site. The Home page has a hero section with a gradient.
 
 ### 10. Typical User Flow
 
-1. A visitor opens the site and browses the Catalog without logging in, then opens a listing's Details page to read the full description and existing comments.
-2. They register a new account (or log in) and are redirected to Home.
-3. Logged in, they publish their own ad through the Add Ad form, choosing whether they are offering something or looking for something.
-4. They search and filter the Catalog, browse other users' ads, add one they like to their Favorites, and leave a comment on it.
-5. On their Profile page they see both their own published listing and the one they favorited; later they can edit or delete their own listing from its Details page.
+1. A visitor opens the site, looks through the Catalog without logging in and opens an ad to read the full description and the comments.
+2. They register (or log in) and go to the Home page.
+3. Now logged in, they post their own ad with the Add Ad form and choose if they are offering something or looking for something.
+4. They search and filter the Catalog, look at other people's ads, add one to Favorites and leave a comment.
+5. On the Profile page they see their own ad and the one they saved to Favorites. Later they can edit or delete their ad from its Details page.
 
 ### 11. Error & Edge Case Handling
 
-- **Authentication errors:** Firebase auth error codes (e.g. wrong password, email already in use) are translated into readable messages via `getAuthErrorMessage(err.code)` and shown inline on the Login/Register form instead of a raw error code or a crash.
-- **Network / data errors:** every Firestore read/write is wrapped in `try/catch`; a failure sets a local error state rendered as a message instead of leaving the page blank or frozen (e.g. "Could not load this ad.", "Could not save changes. Please try again.").
-- **Empty / missing data states:** Catalog shows "No ads yet. Be the first to publish one!" when there are none and "No ads match your search." when the search/filter returns nothing; Details shows "This ad does not exist." if the id doesn't match any document; Profile shows separate empty messages for "no ads yet" and "no favorites yet"; the Comments section shows "No comments yet." when there are none.
+- **Authentication errors:** Firebase error codes (for example wrong password or email already in use) are turned into readable messages with `getAuthErrorMessage(err.code)`. The message is shown on the Login/Register form, so the user doesn't see a strange error code and the app doesn't crash.
+- **Network / data errors:** every Firestore read and write is in a `try/catch`. If something fails, I save the error in the state and show a message (for example "Could not load this ad." or "Could not save changes. Please try again."), so the page doesn't stay empty or stuck.
+- **Empty / missing data:** the Catalog says "No ads yet. Be the first to publish one!" when there are no ads and "No ads match your search." when the search or filter finds nothing. The Details page says "This ad does not exist." if the id is wrong. The Profile page has separate messages when you have no ads and no favorites yet, and the comments section says "No comments yet." when it is empty.
