@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import './Navbar.css';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, displayName, logout } = useAuth();
   const navigate = useNavigate();
 
   async function handleLogout() {
@@ -22,7 +22,7 @@ export default function Navbar() {
           <>
             <Link to="/create">Add Ad</Link>
             <Link to="/profile">Profile</Link>
-            <span className="navbar-email">{user.email}</span>
+            <span className="navbar-email">{displayName || user.email}</span>
             <button onClick={handleLogout}>Logout</button>
           </>
         ) : (

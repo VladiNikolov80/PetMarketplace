@@ -6,7 +6,7 @@ import ListingCard from '../components/ListingCard';
 import './Profile.css';
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, displayName } = useAuth();
 
   const [myListings, setMyListings] = useState([]);
   const [favoriteListings, setFavoriteListings] = useState([]);
@@ -54,7 +54,7 @@ export default function Profile() {
 
   return (
     <div className="profile-page">
-      <h2>My Profile</h2>
+      <h2>{displayName || 'My Profile'}</h2>
       <p className="profile-email">{user.email}</p>
 
       <div className="profile-section">

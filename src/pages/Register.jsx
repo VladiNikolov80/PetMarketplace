@@ -8,6 +8,7 @@ export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rePassword, setRePassword] = useState('');
@@ -18,6 +19,11 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
+    if (name.trim().length < 2) {
+      setError('Name must be at least 2 characters.');
+      return;
+    }
+
     if (password !== rePassword) {
       setError('Passwords do not match.');
       return;
@@ -25,7 +31,7 @@ export default function Register() {
 
     setSubmitting(true);
     try {
-      await register(email, password);
+      await register(name.trim(), email, password);
       navigate('/');
     } catch (err) {
       setError(getAuthErrorMessage(err.code));
@@ -38,6 +44,17 @@ export default function Register() {
     <div>
       <h2>Register</h2>
       <form onSubmit={handleSubmit} className="form">
+        <div className="form-field">
+          <label htmlFor="name">Name</label>
+          <input
+            id="name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+
         <div className="form-field">
           <label htmlFor="email">Email</label>
           <input

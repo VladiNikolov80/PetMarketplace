@@ -7,7 +7,7 @@ import '../components/Form.css';
 const PET_TYPES = ['Dog', 'Cat', 'Bird', 'Rodent', 'Fish', 'Other'];
 
 export default function Create() {
-  const { user } = useAuth();
+  const { user, displayName } = useAuth();
   const navigate = useNavigate();
 
   const [listingType, setListingType] = useState('offer');
@@ -47,7 +47,8 @@ export default function Create() {
       imageUrl: imageUrl.trim(),
       petType,
       authorId: user.uid,
-      authorName: user.email,
+      authorName: displayName || user.email,
+      authorEmail: user.email,
     };
 
     if (category === 'product') {

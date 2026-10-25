@@ -8,7 +8,7 @@ import './Details.css';
 
 export default function Details() {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, displayName } = useAuth();
   const navigate = useNavigate();
 
   const [listing, setListing] = useState(null);
@@ -163,7 +163,7 @@ export default function Details() {
       await addComment({
         listingId: id,
         userId: user.uid,
-        userName: user.email,
+        userName: displayName || user.email,
         text: commentText.trim(),
       });
       const updated = await getComments(id);
@@ -234,7 +234,7 @@ export default function Details() {
               {isFav ? '👍 Favorited' : '👍 Add to favorites'}
             </button>
             <a
-              href={`mailto:${listing.authorName}?subject=${encodeURIComponent(`About your ad: ${listing.title}`)}`}
+              href={`mailto:${listing.authorEmail || listing.authorName}?subject=${encodeURIComponent(`About your ad: ${listing.title}`)}`}
               className="details-contact"
             >
               ✉️ Email the author

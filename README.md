@@ -69,7 +69,7 @@ src/
 
 **Guest (Not Authenticated)**
 - Available pages/routes: `/`, `/catalog`, `/catalog/:id`, `/contact`, `/login`, `/register`
-- Public data shown: all published listings (title, description, price, category, image, author's email) on Catalog and Details, and existing comments on a listing's Details page
+- Public data shown: all published listings (title, description, price, category, image, author's display name) on Catalog and Details, and existing comments on a listing's Details page
 
 **Authenticated User**
 - Main sections/pages: everything a guest sees, plus Add Ad (`/create`) and Profile (`/profile`)
@@ -81,7 +81,7 @@ src/
 **Authentication Flow**
 - On app load, `AuthProvider` subscribes to Firebase's `onAuthStateChanged` listener and does not render the rest of the app until the first response arrives (`loading` state), avoiding a flash of the wrong (logged-out/logged-in) UI
 - Authentication status is checked entirely through that listener — there is no manual token or flag read by the app's own code
-- On successful registration, a new Firebase Auth user is created and a matching `users/{uid}` document is written to Firestore (email + createdAt); the user is then redirected to `/`
+- On successful registration, a new Firebase Auth user is created and a matching `users/{uid}` document is written to Firestore (name + email + createdAt). The name entered on the Register form is also saved as the Firebase Auth `displayName` (`updateProfile()`), and it is shown instead of the email in the Navbar, on the user's ads ("Posted by …") and on their comments; the user is then redirected to `/`
 - On successful login, the user is redirected to `/`
 - On logout, Firebase signs the user out, `onAuthStateChanged` fires with `null`, and the Navbar/guards immediately reflect the logged-out state
 
@@ -128,7 +128,7 @@ src/
 CRUD is implemented for the `listings` collection.
 
 **Create (POST)**
-- The user fills in a controlled form on the Add Ad page (ad type Offering/Looking for, title, description, price in EUR, category, image URL, pet type, plus condition/brand for a product or availability for a service, depending on the selected category). After client-side validation, `createListing()` calls Firestore's `addDoc()`, storing the data together with `authorId`, `authorName` and a server timestamp.
+- The user fills in a controlled form on the Add Ad page (ad type Offering/Looking for, title, description, price in EUR, category, image URL, pet type, plus condition/brand for a product or availability for a service, depending on the selected category). After client-side validation, `createListing()` calls Firestore's `addDoc()`, storing the data together with `authorId`, `authorName` (the author's display name), `authorEmail` (used by the "Email the author" button) and a server timestamp.
 
 **Read (GET)**
 - `getListings()` fetches all listings for the Catalog page; `getListingById(id)` fetches a single listing for the Details and Edit pages. Both read from Firestore through the modular SDK (`getDocs`/`getDoc`).
@@ -147,6 +147,7 @@ CRUD is implemented for the `listings` collection.
 
 **Validation Rules (at least three fields)**
 - **Email** (Register/Login): required, `type="email"`; invalid credentials are also caught by Firebase itself and translated into a readable message.
+- **Name** (Register): required, trimmed, at least 2 characters ("Name must be at least 2 characters.").
 - **Password** (Register): required, `minLength={6}`, plus a client-side check that the repeated password matches before submitting ("Passwords do not match").
 - **Price** (Add Ad/Edit Ad — multiple rules on one field, shown in EUR): required, must parse to a number, and must be greater than 0 ("Price must be a positive number").
 - **Title / Description** (Create/Edit listing): required, and trimmed before the check so whitespace-only input is also rejected.
@@ -159,7 +160,7 @@ CRUD is implemented for the `listings` collection.
 - Mount/update/unmount example: the Details page's listing-loading effect sets an `isMounted` flag and returns a cleanup function that flips it to `false` on unmount, preventing a `setState` call after the component is gone if the user navigates away before the Firestore read resolves. The same effect also re-runs (update) whenever the `:id` URL parameter changes, e.g. navigating directly from one listing's Details page to another's.
 
 **Context API**
-- `AuthContext`/`AuthProvider` wraps the whole app (in `main.jsx`) and exposes `{ user, loading, register, login, logout }` through `useAuth()`. It is consumed by the Navbar (to decide which links to show), both route guards, and the Create/Edit/Details/Profile pages (to know the current user's id/email) — a single source of truth for "who is logged in" instead of passing it down as props.
+- `AuthContext`/`AuthProvider` wraps the whole app (in `main.jsx`) and exposes `{ user, displayName, loading, register, login, logout }` through `useAuth()`. `displayName` is kept in its own state so that the Navbar and other pages re-render immediately when the name is set at registration. It is consumed by the Navbar (to decide which links to show), both route guards, and the Create/Edit/Details/Profile pages (to know the current user's id/email) — a single source of truth for "who is logged in" instead of passing it down as props.
 
 **Component Styling**
 - Implemented as a deliberately later step, once the functionality was working. A warm, friendly visual direction (cream background, terracotta accent, soft shadows/rounded corners) is defined as CSS custom properties in `src/index.css` and reused everywhere. Each component/page has its own `.css` file (e.g. `Navbar.css`, `ListingCard.css`, `Form.css` shared by the four forms) instead of one global stylesheet. The listing cards use a horizontal layout (image on one side, info on the other, the whole card is a single clickable link) inspired by a reference marketplace site, and the Home page has a gradient hero section.
